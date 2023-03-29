@@ -1,0 +1,48 @@
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Main {
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+
+        String inputString = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sodales consectetur" +
+                " purus at faucibus. Donec mi quam, tempor vel ipsum non, faucibus suscipit massa. Morbi lacinia" +
+                " velit blandit tincidunt efficitur. Vestibulum eget metus imperdiet sapien laoreet faucibus. Nunc" +
+                " eget vehicula mauris, ac auctor lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit." +
+                " Integer vel odio nec mi tempor dignissim.";
+        InputStream inputStream = new ByteArrayInputStream(inputString.getBytes(StandardCharsets.UTF_8));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        Stream<String> stringStream = reader.lines();
+
+        List<String> stringList = (List<String>) stringStream.flatMap(string -> Arrays.stream(string.toLowerCase(Locale.ROOT).split("\\s|\\p{Punct}"))).collect(Collectors.toList());
+        
+        stringList.removeIf(string -> string.trim().isEmpty());
+
+        Map<String, Integer> stringIntegerMap = new HashMap<>();
+
+        for (String word : stringList) {
+
+            if (stringIntegerMap.containsKey(word)) {
+                stringIntegerMap.put(word, stringIntegerMap.get(word) + 1);
+            } else {
+                stringIntegerMap.put(word, 1);
+            }
+        }
+
+        Comparator<Map.Entry<String, Integer>> valueComparator =
+                Comparator.comparing(Map.Entry<String, Integer>::getValue).reversed()
+                        .thenComparing(Map.Entry<String, Integer>::getKey);
+
+
+        List<Map.Entry<String, Integer>> KeyValueList = new ArrayList<>(stringIntegerMap.entrySet());
+
+        Collections.sort(KeyValueList, valueComparator);
+
+        KeyValueList.stream().limit(10).forEach(x -> System.out.println(x.getKey()));
+
+    }
+}
